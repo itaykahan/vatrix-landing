@@ -407,8 +407,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 28px;
-            height: 28px;
+            width: 28px; height: 28px;
             background: var(--gray-2);
             border-radius: 50%;
             color: var(--gray-7);
@@ -1599,5 +1598,54 @@
             </div>
         </div>
     </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://vvnlcytnivniqzaviluz.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2bmxjeXRuaXZuaXF6YXZpbHV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2OTE2NjEsImV4cCI6MjA4MzI2NzY2MX0.WGhFJM5aPvcJMZM7nXbltovz4GhtxSYFLk_Tycir7RQ';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // File Input Setup
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'application/pdf,image/*';
+        fileInput.style.display = 'none';
+        document.body.appendChild(fileInput);
+
+        // Trigger selection on Hero CTA button click
+        const scanBtn = document.querySelector('.btn-hero-primary');
+        
+        scanBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            fileInput.click();
+        });
+
+        // Handle File Upload to Storage
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const originalBtnText = scanBtn.innerHTML;
+            scanBtn.innerText = 'Uploading...';
+            scanBtn.style.opacity = '0.5';
+
+            const fileName = `${Date.now()}_${file.name}`;
+
+            const { data, error } = await supabase.storage
+                .from('invoices')
+                .upload(fileName, file);
+
+            if (error) {
+                alert('Upload Error: ' + error.message);
+                scanBtn.innerHTML = originalBtnText;
+                scanBtn.style.opacity = '1';
+            } else {
+                scanBtn.innerText = 'Processing...';
+                console.log('File uploaded successfully:', data.path);
+                alert('File uploaded successfully. Processing started.');
+            }
+        });
+    </script>
 </body>
 </html>
